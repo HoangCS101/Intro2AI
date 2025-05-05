@@ -3,19 +3,8 @@ import ChessTest
 
 
 class GameState:
-    """
-    Class responsible for storing information about the current state of the game.
-    The functions within this class are responsible for how moves are made, undone,
-    determining valid moves given the current state, and keeping a move log.
-    """
-
     def __init__(self):
-        """
-        The board is a 8x8 2d list. Each element has 2 characters.
-        1st character represents the colour of the piece (b/w).
-        2nd character represents the type of the piece.
-        "--" represents an empty space with no piece.
-        """
+
         chess_gen = ChessTest.ChessBoards()
         self.board = chess_gen.get_board()
         self.move_functions = {'P': self.get_pawn_moves, 'R': self.get_rook_moves, 'N': self.get_knight_moves,
@@ -43,12 +32,11 @@ class GameState:
                                                self.white_castle_queen_side, self.black_castle_queen_side)]
 
     def make_move(self, move):
-        """Takes a move as a parameter, executes it, and updates move log"""
         global promoted_piece
 
-        self.board[move.start_row][move.start_column] = '--'  # When a piece is moved, the square it leaves is blank
-        self.board[move.end_row][move.end_column] = move.piece_moved  # Moves piece to new location
-        self.move_log.append(move)  # Logs move
+        self.board[move.start_row][move.start_column] = '--'  
+        self.board[move.end_row][move.end_column] = move.piece_moved  
+        self.move_log.append(move)  
 
         if move.piece_moved == 'wK':
             self.white_king_location = (move.end_row, move.end_column)
@@ -577,11 +565,6 @@ class CastleRights:
 
 
 class Move:
-    """
-    Class responsible for storing information about particular moves,
-    including starting and ending positions, which pieces were moved and captured,
-    and special moves such as en passant, pawn promotion, and castling.
-    """
     ranks_to_rows = {'1': 7, '2': 6, '3': 5, '4': 4,
                      '5': 3, '6': 2, '7': 1, '8': 0}
     rows_to_ranks = {v: k for k, v in ranks_to_rows.items()}
@@ -606,31 +589,24 @@ class Move:
         self.move_id = self.start_row * 1000 + self.start_column * 100 + self.end_row * 10 + self.end_column
 
     def __eq__(self, other):
-        """Overrides the equals method because a Class is used"""
         if isinstance(other, Move):
             return self.move_id == other.move_id
         return False
 
     def get_chess_notation(self):
-        """Creates a rank and file chess notation"""
         return self.get_rank_file(self.start_row, self.start_column) + self.get_rank_file(self.end_row, self.end_column)
 
     def get_rank_file(self, rank, column):
         return self.columns_to_files[column] + self.rows_to_ranks[rank]
 
     def __str__(self):
-        """
-        Overrides string function to improve chess notation.
-        Does not 1) specify checks, 2) checkmate, or 3) when
-        multiple same-type pieces can capture the same square.
-        """
         # Castling
         if self.is_castle_move:
             return 'O-O' if self.end_column == 6 else 'O-O-O'
 
         end_square = self.get_rank_file(self.end_row, self.end_column)
 
-        # Pawn moves
+        # Pawn 
         if self.piece_moved[1] == 'P':
             if self.is_capture and self.is_pawn_promotion:  # Pawn promotion
                 return f'{end_square}={promoted_piece}'
@@ -639,7 +615,7 @@ class Move:
             else:  # Normal movement
                 return end_square
 
-        # Other piece moves
+        # Other 
         move_string = self.piece_moved[1]
         if self.is_capture:
             move_string += 'x'

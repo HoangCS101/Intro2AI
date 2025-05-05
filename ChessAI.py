@@ -31,14 +31,14 @@ piece_positions = {
         [-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0],
         [-4.0, -2.0, 0.0, 0.0, 0.0, 0.0, -2.0, -4.0],
         [-3.0, 0.0, 1.0, 1.5, 1.5, 1.0, 0.0, -3.0],
-        [-3.0, 0.5, 1.5, 2.0, 2.0, 1.5, 5.0, -30],
+        [-3.0, 0.5, 1.5, 2.0, 2.0, 1.5, 5.0, -3.0],
         [-3.0, 0.0, 1.5, 2.0, 2.0, 1.5, 0, -3.0],
-        [-3.0, 0.5, 1.0, 1.5, 1.5, 1.0, 5.0, -30],
+        [-3.0, 0.5, 1.0, 1.5, 1.5, 1.0, 5.0, -3.0],
         [-4.0, -2.0, 0.0, 0.5, 0.5, 0.0, -2.0, -4.0],
         [-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0]],
     'bN': [
         [-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0],
-        [-.0, -2.0, 0.0, 0.5, 0.5, 0.0, -2.0, -4.0],
+        [-4.0, -2.0, 0.0, 0.5, 0.5, 0.0, -2.0, -4.0],
         [-3.0, 0.5, 1.0, 1.5, 1.5, 1.0, 0.5, -3.0],
         [-3.0, 0.0, 1.5, 2.0, 2.0, 1.5, 0.0, -3.0],
         [-3.0, 0.5, 1.5, 2.0, 2.0, 1.5, 0.5, -3.0],
@@ -99,7 +99,7 @@ piece_positions = {
         [-1.0, 0.0, 0.5, 0.5, 0.5, 0.5, 0.0, -1.0],
         [-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0],
         [-2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0]],
-    'wK': [  # Uses chessprogramming.org King middle game values
+    'wK': [  
         [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
         [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
         [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
@@ -108,7 +108,7 @@ piece_positions = {
         [-1.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -1.0],
         [2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 2.0, 2.0],
         [2.0, 3.0, 1.0, 0.0, 0.0, 1.0, 3.0, 2.0]],
-    'bK': [  # Uses chessprogramming.org King middle game values
+    'bK': [  
         [2.0, 3.0, 1.0, 0.0, 0.0, 1.0, 3.0, 2.0],
         [2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 2.0, 2.0],
         [-1.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -1.0],
@@ -132,6 +132,21 @@ def find_best_move(game_state, valid_moves):
                                 1 if game_state.white_to_move else -1)
     return next_move
 
+def find_best_move(game_state, valid_moves, player_color, top_num = 1):
+    global top_moves
+    top_moves = []
+
+    #random.shuffle(valid_moves)
+    is_white = player_color == "white"
+
+    find_minimax(game_state, valid_moves, set_depth, -checkmate_points, checkmate_points, is_white)
+
+    top_moves.sort(key=lambda x:x[0], reverse=is_white)
+
+    top_moves = top_moves[:top_num]
+    if not top_moves:
+        return None
+    return random.choice([move for _, move in top_moves])
 
 def find_negamax_move_alphabeta(game_state, valid_moves, depth, alpha, beta, turn_multiplier):
     """
@@ -170,6 +185,42 @@ def find_negamax_move_alphabeta(game_state, valid_moves, depth, alpha, beta, tur
             break
 
     return max_score
+
+def find_minimax(game_state, valid_moves, depth, alpha, beta, maximizing_player):
+    global top_moves
+    
+    if depth == 0:
+        return score_board(game_state)
+    
+    if maximizing_player: #White
+        max_score = -checkmate_points
+        for move in valid_moves:
+            game_state.make_move(move)
+            next_moves = game_state.get_valid_moves()
+            score = find_minimax(game_state, next_moves, depth - 1, alpha, beta, False)
+            game_state.undo_move()
+            if depth == set_depth:
+                top_moves.append((score, move))
+            max_score = max(max_score, score)
+            alpha = max(alpha, score)
+            if beta <= alpha:
+                break
+        return max_score
+
+    else:
+        min_score = checkmate_points
+        for move in valid_moves:
+            game_state.make_move(move)
+            next_moves = game_state.get_valid_moves()
+            score = find_minimax(game_state, next_moves, depth - 1, alpha, beta, True)
+            game_state.undo_move()
+            if depth == set_depth:
+                top_moves.append((score, move))
+            min_score = min(min_score, score)
+            beta = min(beta, score)
+            if beta <=alpha:
+                break
+        return min_score
 
 
 def score_board(game_state):
