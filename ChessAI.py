@@ -122,7 +122,6 @@ piece_positions = {
 def find_random_move(valid_moves):
     return random.choice(valid_moves)
 
-
 def find_best_move(game_state, valid_moves):
     """Helper method to make first recursive call"""
     global next_move
@@ -132,11 +131,23 @@ def find_best_move(game_state, valid_moves):
                                 1 if game_state.white_to_move else -1)
     return next_move
 
-def find_best_move(game_state, valid_moves, player_color, top_num = 1):
+def find_hard_move(game_state, valid_moves, player_color):
+    return find_best_move(game_state, valid_moves, player_color, 1)
+
+def find_medium_move(game_state, valid_moves, player_color):
+    return find_best_move(game_state, valid_moves, player_color, 3)
+
+def find_easy_move(game_state, valid_moves, player_color):
+    return find_best_move(game_state, valid_moves, player_color, 5)
+
+def find_rand_move(game_state, valid_moves, player_color):
+    return find_random_move(valid_moves)
+
+def find_best_move(game_state, valid_moves, player_color, top_num):
     global top_moves
     top_moves = []
 
-    #random.shuffle(valid_moves)
+    random.shuffle(valid_moves)
     is_white = player_color == "white"
 
     find_minimax(game_state, valid_moves, set_depth, -checkmate_points, checkmate_points, is_white)
@@ -149,20 +160,7 @@ def find_best_move(game_state, valid_moves, player_color, top_num = 1):
     return random.choice([move for _, move in top_moves])
 
 def find_negamax_move_alphabeta(game_state, valid_moves, depth, alpha, beta, turn_multiplier):
-    """
-    NegaMax algorithm with alpha beta pruning.
 
-    Alpha beta pruning eliminates the need to check all moves within the game_state tree when
-    a better branch has been found or a branch has too low of a score.
-
-    alpha: upper bound (max possible); beta: lower bound (min possible)
-    If max score is greater than alpha, that becomes the new alpha value.
-    If alpha becomes >= beta, break out of branch.
-
-    White is always trying to maximise score and black is always
-    trying to minimise score. Once the possibility of a higher max or lower min
-    has been eliminated, there is no need to check further branches.
-    """
     global next_move
     if depth == 0:
         return turn_multiplier * score_board(game_state)

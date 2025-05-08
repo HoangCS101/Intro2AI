@@ -31,7 +31,7 @@ class GameState:
         self.castle_rights_log = [CastleRights(self.white_castle_king_side, self.black_castle_king_side,
                                                self.white_castle_queen_side, self.black_castle_queen_side)]
 
-    def make_move(self, move):
+    def make_move(self, move, isPlayer = False):
         global promoted_piece
 
         self.board[move.start_row][move.start_column] = '--'  
@@ -47,7 +47,8 @@ class GameState:
         if move.is_pawn_promotion:
 
             # Player turn
-            if (self.white_to_move and ChessMain.player_one) or (not self.white_to_move and ChessMain.player_two):
+            # if (self.white_to_move and ChessMain.player_one) or (not self.white_to_move and ChessMain.player_two):
+            if self.white_to_move and isPlayer:
                 promoted_piece = input('Promote to Q(ueen), R(ook), B(ishop), or (k)N(ight):').upper()
 
             else:  # AI turn

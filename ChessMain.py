@@ -18,7 +18,8 @@ colours = [p.Color('#EBEBD0'), p.Color('#769455')]  # Board colours
 move_log_panel_width = 210  # May want to adjust this if the board_width/board_height is changed.
 move_log_panel_height = board_height
 
-
+screen = p.display.set_mode((board_width + move_log_panel_width, board_height))
+clock = p.time.Clock()
 def load_images():
     """Initialize a global dictionary of images"""
     pieces = ['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR', 'bP',
@@ -29,8 +30,7 @@ def load_images():
 
 def main():
     """Main function which handles user input and updates graphics"""
-    screen = p.display.set_mode((board_width + move_log_panel_width, board_height))
-    clock = p.time.Clock()
+    
     screen.fill(p.Color('white'))
     move_log_font = p.font.SysFont('Arial', 14, False, False)
     game_state = ChessEngine.GameState()
@@ -45,7 +45,7 @@ def main():
 
     while running:
         human_turn = (game_state.white_to_move and player_one) or (not game_state.white_to_move and player_two)
-
+        print(game_state.white_to_move)
         for event in p.event.get():
             if event.type == p.QUIT:
                 running = False
@@ -92,7 +92,7 @@ def main():
 
         # AI move finder
         if not game_over and not human_turn:
-            AI_move = ChessAI.find_best_move(game_state, valid_moves, "black", 3)
+            AI_move = ChessAI.find_best_move(game_state, valid_moves, "black", 1)
             if AI_move is None:
                 AI_move = ChessAI.find_random_move(valid_moves)
             game_state.make_move(AI_move)
@@ -118,6 +118,7 @@ def main():
 
         clock.tick(max_fps)
         p.display.flip()
+
 
 
 def draw_game_state(screen, game_state, square_selected, move_log_font):
