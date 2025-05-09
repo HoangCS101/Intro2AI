@@ -110,7 +110,8 @@ class GameplayAIAIScene(Scene):
     def render(self):
         self.screen.fill(pygame.Color('white'))
         self.draw_game_state()
-        if self.game_over:
+        if self.game_state.checkmate or self.game_state.stalemate:
+            self.game_over = True
             if self.game_state.stalemate:
                 text = 'Stalemate'
             else:
