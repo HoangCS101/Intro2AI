@@ -29,6 +29,7 @@ class GameplayPlayerAIScene(Scene):
         self.player_two = False  # AI plays as Black
         
         self.white_turn = True
+        self.human_turn = True  
 
         # Clock
         self.clock = pygame.time.Clock()
@@ -113,7 +114,8 @@ class GameplayPlayerAIScene(Scene):
     def render(self):
         self.screen.fill(pygame.Color('white'))
         self.draw_game_state()
-        if self.game_over:
+        if self.game_state.checkmate or self.game_state.stalemate:
+            self.game_over = True
             if self.game_state.stalemate:
                 text = 'Stalemate'
             else:
